@@ -8,6 +8,7 @@ import DisclaimerDialog from "./components/DisclaimerDialog";
 import AttributeEditor from "./components/AttributeEditor";
 import ContrastChecker from "./components/ContrastChecker";
 import AICommandPanel from "./components/AICommandPanel";
+import ConversationalAI from "./components/ConversationalAI";
 import { useHistory } from "./hooks/useHistory";
 import { AIService, initializeAIService, getAIService, AIEditResponse, CanvasState, ShapeDescription } from "./services/aiService";
 import { createSVG, formatNumber, normalizeColor, escapeXML, sanitizeURL, downloadSVG, optimizeSVG } from "./utils/svgExport";
@@ -759,88 +760,213 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
-        <div className="max-w-[1400px] mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
-          <div className="font-semibold text-lg">FigureLab</div>
-          {currentUser && <div className="text-sm text-slate-600 px-3 py-1 bg-slate-100 rounded-full">👤 {currentUser}</div>}
-          {aiService && <div className="text-xs text-green-600 px-2 py-1 bg-green-50 rounded-full">🤖 AI Ready</div>}
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            <button 
-              onClick={undo} 
-              disabled={!canUndo} 
-              className="px-3 py-1.5 rounded-xl border text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100" 
-              title="Undo (Ctrl/Cmd+Z)"
-            >
-              ↶ Undo
-            </button>
-            <button 
-              onClick={redo} 
-              disabled={!canRedo} 
-              className="px-3 py-1.5 rounded-xl border text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100" 
-              title="Redo (Ctrl/Cmd+Y)"
-            >
-              ↷ Redo
-            </button>
-            <div className="border-r h-6" />
-            <button onClick={addRect} className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm">Rectangle</button>
-            <button onClick={addCircle} className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm">Circle</button>
-            <button onClick={addLine} className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm">Line</button>
-            <button onClick={addArrow} className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm">Arrow</button>
-            <button onClick={addText} className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm">Text</button>
-            <label className="px-3 py-1.5 rounded-2xl bg-slate-900 text-white text-sm cursor-pointer">Upload Image<input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) addImageFromFile(f); }} /></label>
-
-            <button onClick={bringToFront} className="px-2 py-1 rounded-xl border text-sm" title="Bring selected to very front">⬆⬆ To Front</button>
-            <button onClick={bringForward} className="px-2 py-1 rounded-xl border text-sm" title="Bring selected forward one layer">⬆ Forward</button>
-            <button onClick={sendBackward} className="px-2 py-1 rounded-xl border text-sm" title="Send selected backward one layer">⬇ Backward</button>
-            <button onClick={sendToBack} className="px-2 py-1 rounded-xl border text-sm" title="Send selected to very back">⬇⬇ To Back</button>
-            <div className="border-r h-6" />
-            <button onClick={groupSelected} disabled={selectedIds.length < 2} className="px-2 py-1 rounded-xl border text-sm disabled:opacity-30 disabled:cursor-not-allowed" title="Group selected (Ctrl/Cmd+G)">🔗 Group</button>
-            <button onClick={ungroupSelected} className="px-2 py-1 rounded-xl border text-sm" title="Ungroup selected (Ctrl/Cmd+Shift+G)">⛓️‍💥 Ungroup</button>
-
-            <button onClick={exportPNG} className="px-3 py-1.5 rounded-2xl bg-emerald-600 text-white text-sm">Export PNG</button>
-            <button onClick={exportSVG_Konva} className="px-3 py-1.5 rounded-2xl bg-emerald-600 text-white text-sm">Export SVG (Konva)</button>
-            <button onClick={exportSVG_Native} className="px-3 py-1.5 rounded-2xl bg-emerald-600 text-white text-sm">Export SVG (Native)</button>
-            <button onClick={exportPPTX} className="px-3 py-1.5 rounded-2xl bg-emerald-600 text-white text-sm">Export PPTX</button>
-
-            <button onClick={exportProject} className="px-3 py-1.5 rounded-2xl bg-sky-600 text-white text-sm">Save Project</button>
-            <label className="px-3 py-1.5 rounded-2xl border text-sm cursor-pointer">Load Project<input type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) loadJSON(f!); }} /></label>
-
-            <div className="flex items-center gap-2 border rounded-2xl px-2 py-1.5">
-              <label className="text-sm flex items-center gap-1"><input type="checkbox" checked={showGrid} onChange={(e) => setShowGrid(e.target.checked)} /> Grid</label>
-              <label className="text-sm flex items-center gap-1"><input type="checkbox" checked={snapEnabled} onChange={(e) => setSnapEnabled(e.target.checked)} /> Snap</label>
-              <input type="number" min={5} step={1} className="w-16 border rounded px-2 py-1 text-sm" value={gridSize} onChange={(e) => setGridSize(Math.max(5, Number(e.target.value)))} />
+    <div className="min-h-screen w-full bg-gray-50">
+      {/* Modern Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-gray-900">FigureLab</h1>
+              <span className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded-full">
+                v1.0
+              </span>
+              {currentUser && (
+                <div className="text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-full">
+                  👤 {currentUser}
+                </div>
+              )}
             </div>
-
-            <div className="flex items-center gap-1">
-              <button onClick={() => alignSelected("left")} className="px-2 py-1 rounded-xl border text-sm">Align L</button>
-              <button onClick={() => alignSelected("hcenter")} className="px-2 py-1 rounded-xl border text-sm">Align H‑C</button>
-              <button onClick={() => alignSelected("right")} className="px-2 py-1 rounded-xl border text-sm">Align R</button>
-              <button onClick={() => alignSelected("top")} className="px-2 py-1 rounded-xl border text-sm">Align T</button>
-              <button onClick={() => alignSelected("vcenter")} className="px-2 py-1 rounded-xl border text-sm">Align V‑C</button>
-              <button onClick={() => alignSelected("bottom")} className="px-2 py-1 rounded-xl border text-sm">Align B</button>
-              <button onClick={() => distribute("h")} className="px-2 py-1 rounded-xl border text-sm">Distribute H</button>
-              <button onClick={() => distribute("v")} className="px-2 py-1 rounded-xl border text-sm">Distribute V</button>
-              <button onClick={connectSelected} className="px-2 py-1 rounded-xl border text-sm" title="Connect two selected (Ctrl/Cmd+G)">Connect</button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Undo (Ctrl/Cmd+Z)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Redo (Ctrl/Cmd+Y)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                </svg>
+              </button>
+              <div className="border-l h-6 border-gray-300"></div>
+              <button
+                onClick={exportProject}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+              >
+                Save Project
+              </button>
+              <label className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium text-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                Load Project
+                <input
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) loadJSON(f!);
+                  }}
+                />
+              </label>
             </div>
-
-            <button onClick={deleteSelected} className="px-3 py-1.5 rounded-2xl bg-rose-600 text-white text-sm">Delete</button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-[1400px] mx-auto p-4 grid grid-cols-12 gap-4">
-        <section className="col-span-9">
-          <div className="mb-3 flex items-center gap-3">
-            <label className="text-sm">Canvas W×H</label>
-            <input type="number" className="w-24 border rounded-xl px-2 py-1" value={stageSize.width} onChange={(e) => setStageSize((s) => ({ ...s, width: Number(e.target.value) }))} />
-            <input type="number" className="w-24 border rounded-xl px-2 py-1" value={stageSize.height} onChange={(e) => setStageSize((s) => ({ ...s, height: Number(e.target.value) }))} />
-            <label className="text-sm ml-4">Background</label>
-            <input type="color" className="h-8 w-12 border rounded" value={bg} onChange={(e) => setBg(e.target.value)} />
+      {/* Main Content with Conversational AI */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left: Conversational AI Panel */}
+          <div className="lg:col-span-1">
+            <div className="h-[calc(100vh-12rem)] sticky top-24">
+              <ConversationalAI
+                aiService={aiService}
+                currentState={getCanvasState()}
+                onExecuteActions={handleExecuteAIActions}
+                onConfigureAPI={handleConfigureAPI}
+              />
+            </div>
           </div>
 
-          <div className="rounded-2xl overflow-hidden shadow bg-white p-3">
-            <div style={{ background: bg }} className="rounded-xl overflow-hidden border border-slate-200">
+          {/* Right: Canvas and Tools */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Page Title */}
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Create professional diagrams with AI
+              </h2>
+              <p className="text-gray-600">
+                Describe what you want in plain English, and watch it come to life
+              </p>
+            </div>
+
+            {/* Quick Actions Toolbar */}
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-gray-700 mr-2">Quick Add:</span>
+                <button
+                  onClick={addRect}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  📐 Rectangle
+                </button>
+                <button
+                  onClick={addCircle}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  ⭕ Circle
+                </button>
+                <button
+                  onClick={addLine}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  📏 Line
+                </button>
+                <button
+                  onClick={addArrow}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  ➡️ Arrow
+                </button>
+                <button
+                  onClick={addText}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  📝 Text
+                </button>
+                <label className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors">
+                  🖼️ Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) addImageFromFile(f);
+                    }}
+                  />
+                </label>
+                <div className="border-l h-6 border-gray-300 mx-2"></div>
+                <button
+                  onClick={deleteSelected}
+                  disabled={selectedIds.length === 0}
+                  className="px-3 py-1.5 text-sm bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Canvas Settings */}
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Canvas Size:</label>
+                  <input
+                    type="number"
+                    className="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                    value={stageSize.width}
+                    onChange={(e) => setStageSize((s) => ({ ...s, width: Number(e.target.value) }))}
+                  />
+                  <span className="text-gray-500">×</span>
+                  <input
+                    type="number"
+                    className="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                    value={stageSize.height}
+                    onChange={(e) => setStageSize((s) => ({ ...s, height: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Background:</label>
+                  <input
+                    type="color"
+                    className="h-10 w-16 border border-gray-300 rounded-lg cursor-pointer"
+                    value={bg}
+                    onChange={(e) => setBg(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={showGrid}
+                      onChange={(e) => setShowGrid(e.target.checked)}
+                      className="rounded"
+                    />
+                    Grid
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={snapEnabled}
+                      onChange={(e) => setSnapEnabled(e.target.checked)}
+                      className="rounded"
+                    />
+                    Snap
+                  </label>
+                  <input
+                    type="number"
+                    min={5}
+                    step={1}
+                    className="w-16 border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                    value={gridSize}
+                    onChange={(e) => setGridSize(Math.max(5, Number(e.target.value)))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Canvas */}
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div style={{ background: bg }} className="rounded-lg overflow-hidden border border-gray-300">
               <Stage
                 ref={stageRef}
                 width={stageSize.width}
@@ -967,102 +1093,96 @@ export default function App() {
                 </Layer>
               </Stage>
             </div>
-          </div>
-        </section>
+            </div>
 
-        <aside className="col-span-3">
-          <div className="bg-white rounded-2xl shadow p-4 space-y-4 border border-slate-200 mb-4">
-            <AICommandPanel
-              aiService={aiService}
-              currentState={getCanvasState()}
-              selectedShapes={selectedIds}
-              onExecuteActions={handleExecuteAIActions}
-              onConfigureAPI={handleConfigureAPI}
-            />
-          </div>
+            {/* Export Options */}
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Export</h3>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={exportPNG}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  PNG
+                </button>
+                <button
+                  onClick={exportSVG_Native}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  SVG
+                </button>
+                <button
+                  onClick={exportPPTX}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  PowerPoint
+                </button>
+              </div>
+            </div>
 
-          <div className="bg-white rounded-2xl shadow p-4 space-y-4 border border-slate-200">
-            <h3 className="font-semibold">Inspector</h3>
-            {selectedIds.length === 0 && <div className="text-sm text-slate-500">Select one or more elements. Shift/Cmd click, or drag to marquee-select.</div>}
-            {(() => {
-              const active = (selectedIds.length === 1 ? shapes.find((s) => s.id === selectedIds[0]) || null : null);
+            {/* Inspector Panel - Compact */}
+            {selectedIds.length === 1 && (() => {
+              const active = shapes.find((s) => s.id === selectedIds[0]);
               if (!active) return null;
               return (
-                <div className="space-y-3 text-sm">
-                  <div className="text-xs uppercase tracking-wide text-slate-500">{active.type}</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className="flex items-center gap-2">X<input className="w-20 border rounded px-2 py-1" type="number" value={active.x} onChange={(e) => updateShape(active.id, { x: Number(e.target.value) } as any)} /></label>
-                    <label className="flex items-center gap-2">Y<input className="w-20 border rounded px-2 py-1" type="number" value={active.y} onChange={(e) => updateShape(active.id, { y: Number(e.target.value) } as any)} /></label>
-                    <label className="flex items-center gap-2">Rot<input className="w-20 border rounded px-2 py-1" type="number" value={active.rotation || 0} onChange={(e) => updateShape(active.id, { rotation: Number(e.target.value) } as any)} /></label>
-                  </div>
-                  {active.type === "rect" && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="flex items-center gap-2">W<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).width} onChange={(e) => updateShape(active.id, { width: Number(e.target.value) } as any)} /></label>
-                      <label className="flex items-center gap-2">H<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).height} onChange={(e) => updateShape(active.id, { height: Number(e.target.value) } as any)} /></label>
-                      <label className="flex items-center gap-2">Radius<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).cornerRadius || 0} onChange={(e) => updateShape(active.id, { cornerRadius: Number(e.target.value) } as any)} /></label>
+                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Selected: {active.type.charAt(0).toUpperCase() + active.type.slice(1)}
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="grid grid-cols-3 gap-2">
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-600">X</span>
+                        <input
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                          type="number"
+                          value={active.x}
+                          onChange={(e) => updateShape(active.id, { x: Number(e.target.value) } as any)}
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-600">Y</span>
+                        <input
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                          type="number"
+                          value={active.y}
+                          onChange={(e) => updateShape(active.id, { y: Number(e.target.value) } as any)}
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-600">Rotation</span>
+                        <input
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                          type="number"
+                          value={active.rotation || 0}
+                          onChange={(e) => updateShape(active.id, { rotation: Number(e.target.value) } as any)}
+                        />
+                      </label>
                     </div>
-                  )}
-                  {active.type === "circle" && (
-                    <label className="flex items-center gap-2">Radius<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).radius} onChange={(e) => updateShape(active.id, { radius: Number(e.target.value) } as any)} /></label>
-                  )}
-                  {active.type === "text" && (
-                    <>
-                      <label className="block">Text<textarea className="w-full border rounded px-2 py-1" value={(active as any).text} onChange={(e) => updateShape(active.id, { text: e.target.value } as any)} /></label>
-                      <label className="flex items-center gap-2">Font Size<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).fontSize || 24} onChange={(e) => updateShape(active.id, { fontSize: Number(e.target.value) } as any)} /></label>
-                      <label className="flex items-center gap-2">Width<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).width || 0} onChange={(e) => updateShape(active.id, { width: Number(e.target.value) || undefined } as any)} /></label>
-                    </>
-                  )}
-                  {active.type === "image" && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="flex items-center gap-2">W<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).width || 300} onChange={(e) => updateShape(active.id, { width: Number(e.target.value) } as any)} /></label>
-                      <label className="flex items-center gap-2">H<input className="w-24 border rounded px-2 py-1" type="number" value={(active as any).height || 200} onChange={(e) => updateShape(active.id, { height: Number(e.target.value) } as any)} /></label>
-                    </div>
-                  )}
-                  <AttributeEditor
-                    shapeId={active.id}
-                    currentFill={active.fill}
-                    currentStroke={active.stroke}
-                    currentOpacity={active.opacity}
-                    currentStrokeWidth={active.strokeWidth}
-                    onUpdate={(updates) => updateShape(active.id, updates as any)}
-                  />
-                  <div className="space-y-2 pt-2">
-                    <div className="text-xs uppercase tracking-wide text-slate-500">Layer Order</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={bringToFront} className="px-2 py-1 rounded-xl border text-xs hover:bg-slate-100">⬆⬆ To Front</button>
-                      <button onClick={bringForward} className="px-2 py-1 rounded-xl border text-xs hover:bg-slate-100">⬆ Forward</button>
-                      <button onClick={sendBackward} className="px-2 py-1 rounded-xl border text-xs hover:bg-slate-100">⬇ Backward</button>
-                      <button onClick={sendToBack} className="px-2 py-1 rounded-xl border text-xs hover:bg-slate-100">⬇⬇ To Back</button>
-                    </div>
+                    <AttributeEditor
+                      shapeId={active.id}
+                      currentFill={active.fill}
+                      currentStroke={active.stroke}
+                      currentOpacity={active.opacity}
+                      currentStrokeWidth={active.strokeWidth}
+                      onUpdate={(updates) => updateShape(active.id, updates as any)}
+                    />
                   </div>
                 </div>
               );
             })()}
           </div>
-
-          <div className="bg-white rounded-2xl shadow p-4 space-y-3 mt-4 border border-slate-200">
-            <ContrastChecker 
-              foregroundColor={selectedIds.length === 1 ? shapes.find(s => s.id === selectedIds[0])?.fill : undefined}
-              backgroundColor={bg}
-            />
-          </div>
-
-          <div className="bg-white rounded-2xl shadow p-4 space-y-3 mt-4 border border-slate-200">
-            <h3 className="font-semibold">Shortcuts</h3>
-            <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
-              <li>Shift/Cmd click to multi-select</li>
-              <li>Drag on empty space to marquee-select</li>
-              <li>Ctrl/Cmd + D to duplicate selection</li>
-              <li>Ctrl/Cmd + G to group (Shift+G to ungroup)</li>
-              <li>Ctrl/Cmd + Z to undo, Ctrl/Cmd + Y to redo</li>
-              <li>Arrow keys to nudge (hold Shift for grid step)</li>
-              <li>Double‑click text to edit inline</li>
-            </ul>
-          </div>
-        </aside>
+        </div>
       </main>
 
-      <footer className="max-w-[1400px] mx-auto px-4 pb-6 pt-2 text-xs text-slate-500">Built with React + Konva. Multi‑select, distribute, connectors, PNG/SVG/PPTX export, and JSON projects.</footer>
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <p className="text-center text-sm text-gray-500">
+            FigureLab - AI-powered diagram editor • Built with React + Konva
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
