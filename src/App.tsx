@@ -1089,6 +1089,7 @@ export default function App() {
                 </Layer>
               </Stage>
             </div>
+            </div>
 
             {/* Export Options */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
