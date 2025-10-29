@@ -4,10 +4,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FigureLab</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>FigureLab - Professional Figure & Diagram Editor</title>
+    <meta name="title" content="FigureLab - Professional Figure & Diagram Editor">
+    <meta name="description" content="Create, edit, and export professional figures and diagrams with AI-powered natural language editing, advanced styling, and cross-browser compatibility.">
+    <meta name="keywords" content="diagram editor, figure editor, vector graphics, SVG export, AI editing, Konva, React">
+    <meta name="author" content="FigureLab">
+    
+    <!-- Cross-browser compatibility -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FigureLab - Professional Figure & Diagram Editor">
+    <meta property="og:description" content="Create, edit, and export professional figures and diagrams with AI-powered features">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="FigureLab - Professional Figure & Diagram Editor">
+    <meta property="twitter:description" content="Create, edit, and export professional figures and diagrams with AI-powered features">
+    
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <style>
-      body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-      button, input, textarea, summary, details, label { font-family: inherit; }
+      /* Base styles with cross-browser support */
+      body { 
+        margin: 0; 
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      button, input, textarea, summary, details, label { 
+        font-family: inherit; 
+      }
+      /* Disable pull-to-refresh on mobile */
+      body {
+        overscroll-behavior-y: contain;
+      }
+      /* Better touch targets for mobile */
+      @media (pointer: coarse) {
+        button, input[type="button"], input[type="submit"] {
+          min-height: 44px;
+          min-width: 44px;
+        }
+      }
     </style>
   </head>
   <body>
