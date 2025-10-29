@@ -26,7 +26,7 @@ const ConversationalAI: React.FC<ConversationalAIProps> = ({
     {
       id: '1',
       role: 'system',
-      content: 'Welcome to FigureLab! I can help you create and edit diagrams using natural language. Try commands like:\n\n• "Create a blue circle in the center"\n• "Add a rectangle with rounded corners"\n• "Make it bigger and change the color to red"\n• "Connect the shapes with an arrow"\n\nWhat would you like to create?',
+      content: 'Welcome to FigureLab! I\'m your AI assistant powered by ChatGPT. I can help you create and edit diagrams using natural language.\n\n✨ Try commands like:\n• "Create a blue circle in the center"\n• "Add a rectangle with rounded corners"  \n• "Make it bigger and change the color to red"\n• "Connect the shapes with an arrow"\n• "Create a flowchart with 3 steps"\n\nWhat would you like to create today?',
       timestamp: new Date(),
     },
   ]);
@@ -47,12 +47,7 @@ const ConversationalAI: React.FC<ConversationalAIProps> = ({
     if (!input.trim() || isProcessing) return;
 
     if (!aiService) {
-      const confirmSetup = window.confirm(
-        'AI features require an OpenAI API key. Would you like to configure it now?'
-      );
-      if (confirmSetup) {
-        onConfigureAPI();
-      }
+      alert('AI service not initialized. Please refresh the page.');
       return;
     }
 
@@ -123,14 +118,12 @@ const ConversationalAI: React.FC<ConversationalAIProps> = ({
             </p>
           </div>
         </div>
-        {!aiService && (
-          <button
-            onClick={onConfigureAPI}
-            className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-          >
-            Configure API Key
-          </button>
-        )}
+        <button
+          onClick={onConfigureAPI}
+          className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          ℹ️ Setup Info
+        </button>
       </div>
 
       {/* Messages */}

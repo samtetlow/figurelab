@@ -74,12 +74,16 @@ export default function App() {
       }
     }
 
-    // Try to load API key
-    const savedApiKey = localStorage.getItem('figurelab_openai_key');
-    if (savedApiKey && AIService.validateApiKey(savedApiKey)) {
-      const service = initializeAIService({ apiKey: savedApiKey });
-      setAiService(service);
-    }
+    // Initialize AI service (uses backend, no API key needed)
+    const service = initializeAIService();
+    setAiService(service);
+    
+    // Check if backend is available
+    service.checkHealth().then(available => {
+      if (!available) {
+        console.warn('AI backend not available. Start the backend server with: cd server && npm install && npm start');
+      }
+    });
   }, []);
 
   const handleDisclaimerAccept = (username: string) => {
@@ -88,15 +92,7 @@ export default function App() {
   };
 
   const handleConfigureAPI = () => {
-    const apiKey = prompt('Enter your OpenAI API key (starts with sk-):');
-    if (apiKey && AIService.validateApiKey(apiKey)) {
-      localStorage.setItem('figurelab_openai_key', apiKey);
-      const service = initializeAIService({ apiKey });
-      setAiService(service);
-      alert('API key saved! You can now use AI commands.');
-    } else if (apiKey) {
-      alert('Invalid API key. Please check and try again.');
-    }
+    alert('AI is now powered by the backend server. No API key configuration needed on the frontend!\n\nMake sure the backend server is running:\n1. Open a new terminal\n2. cd server\n3. npm install\n4. Create .env file with OPENAI_API_KEY\n5. npm start');
   };
 
   const handleExecuteAIActions = (response: AIEditResponse) => {
@@ -1092,7 +1088,6 @@ export default function App() {
                   <Transformer ref={trRef} rotateEnabled={true} enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right", "middle-left", "middle-right", "top-center", "bottom-center"]} boundBoxFunc={(oldBox, newBox) => { if (newBox.width < 5 || newBox.height < 5) return oldBox; return newBox; }} />
                 </Layer>
               </Stage>
-            </div>
             </div>
 
             {/* Export Options */}
